@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,8 +21,14 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
-        'password',
+        'email', 
+        'password', 
+        'type', 
+        'company_name', 
+        'contact_information',
+        'email_verified_at',
+        'location', 
+        'is_active'
     ];
 
     /**
@@ -43,6 +51,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'type' => UserType::class,
         ];
     }
 }
