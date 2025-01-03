@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -54,5 +55,20 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'type' => UserType::class,
         ];
+    }
+
+
+
+
+    public function blogPosts(): HasMany
+    {
+        return $this->hasMany(BlogPost::class);
+    }
+
+
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 }
