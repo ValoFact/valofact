@@ -71,5 +71,22 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    public function bids(): HasMany
+    {
+        return $this->hasMany(Bid::class);
+    }
+
+
+    public function messagesSent(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
+
+    public function messagesReceived(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
 
 }

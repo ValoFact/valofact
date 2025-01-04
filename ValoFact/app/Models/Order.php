@@ -71,5 +71,10 @@ class Order extends Model
         return $this->hasMany(Item::class);
     }
 
+    public function bids(): HasMany
+    {
+        return $this->hasMany(Bid::class);
+    }
+
 
 }
