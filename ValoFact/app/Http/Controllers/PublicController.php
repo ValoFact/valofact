@@ -2,40 +2,42 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
 
-class AdminController extends Controller
+
+class PublicController extends Controller
 {
     /**
-     * Display the admin dashboard
+     * Display the home page.
      */
     public function index()
     {
-        //redirect to the admin home page
+        
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new user.
      */
-    public function create()
+    public function createUser()
+    {
+        
+    }
+
+    /**
+     * Apply for a newly created user.
+     */
+    public function userApply(Request $request)
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Display the specified user.
      */
-    public function store(Request $request)
+    public function showUser(string $id)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        
     }
 
     /**
