@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class AdminController extends Controller
 {
@@ -60,5 +63,18 @@ class AdminController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function activateUser(User $user)
+    {
+        $user->update(['is_active' => true]);
+        return view('welcome');
+    }
+
+    public function desactivateUser(User $user)
+    {
+        $user->update(['is_active' => false]);
+        return view('welcome');
     }
 }

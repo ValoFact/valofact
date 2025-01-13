@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('contact_information')->nullable();
             $table->string('location')->nullable();
             $table->boolean('is_active')->default(false);
-            $table->string('type')->default(UserType::BUYER->value);
+            $table->enum('type', [UserType::BUYER->value, UserType::SELLER->value])->default(UserType::BUYER->value);
             $table->rememberToken();
             $table->timestamps();
         });

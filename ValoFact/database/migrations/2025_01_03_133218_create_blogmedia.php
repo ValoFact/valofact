@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BlogPost;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,10 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('blogmedia', function (Blueprint $table) {
+        Schema::create('blog_medias', function (Blueprint $table) {
             $table->id();
             $table->string('path');
             $table->timestamps();
+            $table->foreignIdFor(BlogPost::class)->constrained()->cascadeOnDelete();
         });
     }
 
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('blogmedia');
+        Schema::dropIfExists('blog_media');
     }
 };

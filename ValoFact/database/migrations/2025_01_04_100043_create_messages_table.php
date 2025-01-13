@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('content');
             $table->timestamp('readt_at');
             $table->timestamps();
+            
         });
     }
 

@@ -8,5 +8,5 @@ enum UserType: string
 {
     case SELLER = 'seller';
     case BUYER = 'buyer';
-    case ADMIN = 'admin';
+    //case ADMIN = 'admin';
 }

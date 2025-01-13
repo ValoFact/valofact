@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount');
-            $table->string('status')->default(PaymentStatus::PENDING->value);
+            $table->enum('status', [PaymentStatus::PENDING->value, PaymentStatus::COMPLETE->value, PaymentStatus::FAILED->value])->default(PaymentStatus::PENDING->value);
             $table->timestamp('transaction_date');
             $table->timestamps();
         });
