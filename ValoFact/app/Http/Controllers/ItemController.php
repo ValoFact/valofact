@@ -14,7 +14,7 @@ class ItemController extends Controller
      */
     public function index(Order $order)
     {
-        $items = $order->items()->all();
+        $items = $order->items()->get();
         //return the items listing page
     }
 
@@ -45,7 +45,7 @@ class ItemController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Item $item)
     {
         //
     }

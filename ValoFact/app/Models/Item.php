@@ -21,6 +21,8 @@ class Item extends Model
         'quantity',
         'quantity_unit',            // quantity unit = kg, ton ...
         'unit_price',               // unit price per kg/ton  
+        'order_id',
+        'item_category_id'
     ];
 
 

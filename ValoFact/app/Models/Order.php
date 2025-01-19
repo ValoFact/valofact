@@ -27,7 +27,8 @@ class Order extends Model
         'start_price',
         'start_date',
         'end_date',
-        'status'
+        'status',
+        'user_id'
     ];
 
 
