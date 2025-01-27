@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 
 class Bid extends Model
 {
@@ -49,5 +50,12 @@ class Bid extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    
+
+    public function scopeAccepted(Builder $builder): Builder
+    {
+        return $builder->where('status', 'accepted'); 
     }
 }

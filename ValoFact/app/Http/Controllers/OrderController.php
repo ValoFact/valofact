@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\OrderFormRequest;
-use App\Http\Requests\OrdersFiltersRequest;
-use App\Http\Requests\OrderUpdateRequest;
-use App\Models\Item;
-use App\Models\ItemCategory;
-use App\Models\Order;
+use App\Events\OrderCreatedEvent;
+use App\Http\Requests\{OrderFormRequest, OrdersFiltersRequest};
+use App\Models\{Item, ItemCategory, Order, OrderMedia, User};
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -63,27 +63,40 @@ class OrderController extends Controller
      */
     public function store(OrderFormRequest $request)
     {
-        $userId = FacadesRequest::user()->id;
-        $data = $request->validated() + ['user_id' => $userId];
-        //dd($data);
-        //dd($request->validated());
+        $user = FacadesRequest::user();
+        $userId = $user->id;
+        $validatedData = $request->validated();
+        $data = $validatedData + ['user_id' => $userId];
+        //order creation
         $order = Order::create($data);
         $items = [];
+        $medias = [];
+        //items treatment
         foreach($data['items'] as $item):
-            $orderId = ['order_id' => $order->id];
-            $item = $item + $orderId;
-            $itemCategoryId = $item['item_category_id'];
+            $item = $item + ['order_id' => $order->id];
             //dd($item);
             $itemModel = Item::create($item);
-            $itemCategory = ItemCategory::find($itemCategoryId);
+            $itemCategory = ItemCategory::find($item['item_category_id']);
             $itemCategory->items()->save($itemModel);
             $items[] = $itemModel;
         endforeach;
-        //dd($items);
+        //medias treatment
+        if(!empty($data['medias'])){
+            foreach($data['medias'] as $media):
+                $mediaFile = /**@var UploadedFile|null */ $media['file'];
+                if($mediaFile !== null && !$mediaFile->getError()){
+                    $mediaData = ['order_id' => $order->id] + ['path' => $mediaFile->store('order', 'public')];
+                    $mediaModel = OrderMedia::create($mediaData);
+                    $medias[] = $mediaModel;
+                }
+            endforeach;
+        }
+        //associating relations
         $order->items()->saveMany($items);
-        
-        //new event: order event
-        return to_route('order.create')->with('success', 'Order \'' . $order->title . '\' created successfully');
+        $order->orderMedias()->saveMany($medias);
+        $user->orders()->save($order);
+        event(new OrderCreatedEvent($order, 'creation', $user, route('order', $order), null));
+        return to_route('public.home', $order)->with('success', 'Order \'' . $order->title . '\' created successfully');
     }
 
     /**
@@ -107,30 +120,90 @@ class OrderController extends Controller
      */
     public function update(OrderFormRequest $request, Order $order)
     {
+        $user = FacadesRequest::user();
         $data = $request->validated();
+        //deleting old items records
         $order->items->each->delete();
-        $order->update($data);
+        //deleting old medias records
+        foreach($order->medias as $media){
+            Storage::disk('public')->delete($media->path);
+        }
+        $order->medias->each->delete();
+        //items treatment
         $items = [];
         foreach($data['items'] as $item):
-            $orderId = ['order_id' => $order->id];
-            $item = $item + $orderId;
-            $itemCategoryId = $item['item_category_id'];
-            //dd($item);
+            $item = $item + ['order_id' => $order->id];
             $itemModel = Item::create($item);
-            $itemCategory = ItemCategory::find($itemCategoryId);
+            $itemCategory = ItemCategory::find($item['item_category_id']);
             $itemCategory->items()->save($itemModel);
             $items[] = $itemModel;
         endforeach;
-        //dd($items);
+        //medias treatment
+        $medias = [];
+        if(!empty($data['medias'])){
+            foreach($data['medias'] as $media):
+                $mediaFile = /**@var UploadedFile|null */ $media['file'];
+                if($mediaFile !== null && !$mediaFile->getError()){
+                    $mediaData = ['order_id' => $order->id] + ['path' => $mediaFile->store('order', 'public')];
+                    $mediaModel = OrderMedia::create($mediaData);
+                    $medias[] = $mediaModel;
+                }
+            endforeach;
+        }
+        //order model update
+        $order->update($data);
+        //relations update;
         $order->items()->saveMany($items);
-        //return the order showing page with a success message.
+        $order->medias()->saveMany($medias);
+        if(!empty($order->bids)){
+            event(new OrderCreatedEvent($order, 'update', $user, route('order', $order), null));
+        }
+        return to_route('order', $order)->with('success', 'Order: \'' . $order->title . '\' has been updated successfully');
     }
+
+
+    public function sold(Order $order): void
+    {
+        if(!empty($order->bids)){
+            $order->status = 'sold';
+            $order->save();
+            $user = User::find($order->user_id);
+            $bid = $order->bids()->Accepted();
+            event(new OrderCreatedEvent($order, 'sold', $user, route('order', $order), $bid));
+        }else{
+            throw new Exception('Order can\'t be assigned as sold because there is no bids yet');
+        }
+    }
+
+    public function expired(Order $order): void
+    {
+        if(!empty($order->bids)){
+            $order->status = 'expired';
+            $order->save();
+            $bid = $order->bids()->Accepted();
+            $user = User::find($order->user_id);
+            event(new OrderCreatedEvent($order, 'expired', $user, route('order', $order), $bid));
+        }else{
+            $order->status = 'expired';
+            $order->save();
+            $user = User::find($order->user_id);
+            event(new OrderCreatedEvent($order, 'expired&nobids', $user, route('order', $order), null));
+        }
+        
+    }
+
+
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Order $order)
     {
+        //deleting medias records
+        foreach($order->medias as $media){
+            Storage::disk('public')->delete($media->path);
+        }
         $order->delete();
         //return the orders listing page with a success message of deleting the order. 
     }

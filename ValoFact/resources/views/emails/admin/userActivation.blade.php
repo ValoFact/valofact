@@ -14,7 +14,7 @@ A new profile has been registered:
 Click on the following button to validate this profile
 
 <x-mail::button :url="$url">
-Button Text
+Validate Profile
 </x-mail::button>
 
 Thanks,<br>

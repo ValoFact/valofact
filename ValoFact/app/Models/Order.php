@@ -61,7 +61,7 @@ class Order extends Model
     }
 
 
-    public function medias(): HasMany
+    public function orderMedias(): HasMany
     {
         return $this->hasMany(OrderMedia::class);
     }
@@ -75,6 +75,11 @@ class Order extends Model
     public function bids(): HasMany
     {
         return $this->hasMany(Bid::class);
+    }
+
+    public function lastBid()
+    {
+        return $this->hasOne(Bid::class)->latestOfMany('bid_time');
     }
 
 
