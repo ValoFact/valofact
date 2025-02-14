@@ -16,8 +16,8 @@ class BlogCategoryController extends Controller
      */
     public function index()
     {
-        $blogPosts = BlogCategory::orderBy('published_at', 'desc')->paginate(6);
-        //redirect to the categories listing page
+        $categories = BlogCategory::with('blogPosts')->latest()->get();
+        return response()->json($categories);
     }
 
 

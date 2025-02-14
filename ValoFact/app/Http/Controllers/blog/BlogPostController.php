@@ -9,6 +9,7 @@ use App\Http\Requests\BlogPostFormRequest;
 use App\Models\BlogCategory;
 use App\Models\BlogMedia;
 use App\Models\BlogPost;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -18,10 +19,10 @@ class BlogPostController extends Controller
     /**
      * Display a listing of the blogposts
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $blogPosts = BlogPost::orderBy('published_at', 'desc')->paginate(6);
-        //redirect to the posts listing page
+        $posts = BlogPost::with('blogMedias')->latest()->get();
+        return response()->json($posts);
     }
 
 
@@ -67,9 +68,10 @@ class BlogPostController extends Controller
     /**
      * Display a specific blogpost
      */
-    public function show(BlogPost $blogPost)
+    public function show(int $id): JsonResponse
     {
-       //redirect to the post page
+        $post = BlogPost::with('blogMedias')->findOrFail($id);
+        return response()->json($post);
     }
 
 

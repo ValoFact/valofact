@@ -29,9 +29,9 @@ class ItemController extends Controller
     /**
      * Store a newly created item in storage.
      */
-    public function store(ItemRequest $request): void
+    public function store(): void
     {
-        $item = Item::create($request->validated());
+        
     }
 
     /**
@@ -53,9 +53,9 @@ class ItemController extends Controller
     /**
      * Update the specified item in storage.
      */
-    public function update(ItemRequest $request, Item $item)
+    public function update()
     {
-        $item->update($request->validated());
+
     }
 
     /**

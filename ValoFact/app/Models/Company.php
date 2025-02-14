@@ -30,4 +30,9 @@ class Company extends Model
         'active_since',
         'user_id'
     ];
+
+    public function user(): BelongsTo
+    {
+       return $this->belongsTo(User::class);
+    }
 }

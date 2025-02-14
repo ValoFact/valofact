@@ -10,42 +10,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
     /**
      * Display a listing of the orders.
      */
-    public function index(OrdersFiltersRequest $request)
+    public function index(OrdersFiltersRequest $request): JsonResponse
     {
         //initialising the query for filtering data
         $query = Order::select('id', 'title', 'quantity', 'location', 'status', 'created_at');
 
         //updating the query depending on the inserted filtering data
-        if($request->validated(['title'])){
-            $query = $query->whereFulltext('title', 'like', '%' . $request->input('title') . '%');
-        }
-        if($request->validated(['item_category_id'])){
-            $query = $query->whereHas('items', function ($query) use ($request) {
-                                    $query->select('id', 'order_id', 'item_category_id') // Select only necessary columns from items
-                                        ->where('item_category_id', $request->input('item_category_id'));
-                                });
-        }
-        if($request->validated(['quantiy<'])){
-            $query = $query->where('quantiy', '<=', $request->input('quantiy<'));
-        }
-        if($request->validated(['quantiy>'])){
-            $query = $query->where('quantiy', '>=', $request->input('quantiy>'));
-        }
-        if($request->validated(['location'])){
-            $query = $query->whereFulltext('location', 'like', '%' . $request->input('location') . '%');
-        }
-        if($request->validated(['status'])){
-            $query = $query->where('status', '=', $request->input('status'));
+        if(!empty($request->validated())){
+            if($request->validated(['title'])){
+                $query = $query->whereFulltext('title', 'like', '%' . $request->input('title') . '%');
+            }
+            if($request->validated(['item_category_id'])){
+                $query = $query->whereHas('items', function ($query) use ($request) {
+                                        $query->select('id', 'order_id', 'item_category_id') // Select only necessary columns from items
+                                            ->where('item_category_id', $request->input('item_category_id'));
+                                    });
+            }
+            if($request->validated(['quantiy<'])){
+                $query = $query->where('quantiy', '<=', $request->input('quantiy<'));
+            }
+            if($request->validated(['quantiy>'])){
+                $query = $query->where('quantiy', '>=', $request->input('quantiy>'));
+            }
+            if($request->validated(['location'])){
+                $query = $query->whereFulltext('location', 'like', '%' . $request->input('location') . '%');
+            }
+            if($request->validated(['status'])){
+                $query = $query->where('status', '=', $request->input('status'));
+            }
         }
         
-        $orders = $query->orderBy('created_at', 'desc')->paginate(9);
-        //return the orders listing page
+        
+        $orders = $query->with('orderMedias', 'items')->latest()->get();
+        return response()->json($orders);
     }
 
     /**
@@ -54,6 +59,9 @@ class OrderController extends Controller
     public function create()
     {
         
+        /*$order33 = Order::find(33);
+        $bids = $order33->bids->where('status', '=', 'accepted')->first();
+        dd($bids);*/
         //return the page of creating a new order.
         return view('order.create');
     }
@@ -95,7 +103,7 @@ class OrderController extends Controller
         $order->items()->saveMany($items);
         $order->orderMedias()->saveMany($medias);
         $user->orders()->save($order);
-        event(new OrderCreatedEvent($order, 'creation', $user, route('order', $order), null));
+        //event(new OrderCreatedEvent($order, 'creation', $user, route('order', $order), null));
         return to_route('public.home', $order)->with('success', 'Order \'' . $order->title . '\' created successfully');
     }
 
@@ -158,7 +166,7 @@ class OrderController extends Controller
         if(!empty($order->bids)){
             event(new OrderCreatedEvent($order, 'update', $user, route('order', $order), null));
         }
-        return to_route('order', $order)->with('success', 'Order: \'' . $order->title . '\' has been updated successfully');
+        //return to_route('order', $order)->with('success', 'Order: \'' . $order->title . '\' has been updated successfully');
     }
 
 
@@ -168,7 +176,7 @@ class OrderController extends Controller
             $order->status = 'sold';
             $order->save();
             $user = User::find($order->user_id);
-            $bid = $order->bids()->Accepted();
+            $bid = $order->bids()->where('status', '=', 'accepted')->first();
             event(new OrderCreatedEvent($order, 'sold', $user, route('order', $order), $bid));
         }else{
             throw new Exception('Order can\'t be assigned as sold because there is no bids yet');
@@ -182,12 +190,12 @@ class OrderController extends Controller
             $order->save();
             $bid = $order->bids()->Accepted();
             $user = User::find($order->user_id);
-            event(new OrderCreatedEvent($order, 'expired', $user, route('order', $order), $bid));
+            //event(new OrderCreatedEvent($order, 'expired', $user, route('order', $order), $bid));
         }else{
             $order->status = 'expired';
             $order->save();
             $user = User::find($order->user_id);
-            event(new OrderCreatedEvent($order, 'expired&nobids', $user, route('order', $order), null));
+            //event(new OrderCreatedEvent($order, 'expired&nobids', $user, route('order', $order), null));
         }
         
     }

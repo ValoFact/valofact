@@ -17,7 +17,19 @@ class BidController extends Controller
      */
     public function index()
     {
-        //
+       /* $user = FacadesRequest::user();
+        $order = Order::find(33);
+        $bid = Bid::create([
+            'amount' => 125,
+            'bid_time' => now(), 
+            'order_id' => $order->id, 
+            'user_id' => $user->id, 
+            'status' => 'accepted'
+        ]);
+        $order->bids()->save($bid);
+        $user->bids()->save($bid);
+        return to_route('public.home');
+        */
     }
 
 
@@ -32,24 +44,29 @@ class BidController extends Controller
         $data = $request->validated();
         $dataAdd = ['bid_time' => now(), 'order_id' => $order->id, 'user_id' => $userId, 'status' => 'accepted'];
         $data = $data + $dataAdd;
-
-        foreach($order->bids as $bid){
-            if($data['amount'] <= $bid->amount){
-                $accepted = false;
+        if(!empty($order->bids)){
+            foreach($order->bids as $bid){
+                if($data['amount'] <= $bid->amount){
+                    $accepted = false;
+                }
             }
         }
         
+        
         if($accepted){
-            foreach($order->bids as $bid){
-                $this->outbid($bid);
+            if(!empty($order->bids)){
+                foreach($order->bids as $bid){
+                    $this->outbid($bid);
+                }
             }
-            
+          
             $bid = Bid::create($data);
             $order->bids()->save($bid);
             $user->bids()->save($bid);
             
             //new event: created bid event
-            event(new BidEvent($order, 'created', null, null, route('order', $order)));
+            //event(new BidEvent($order, 'created', null, null, route('order', $order)));
+
             //return the order show page with a success message
         }
         

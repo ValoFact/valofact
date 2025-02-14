@@ -1,19 +1,27 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
-/* General styling */
+ /*General styling */
+
+.bg-nature {
+    background-image: url('/images/nature-background.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
 .card {
     border: 1px solid #ced4da; /* Add border to cards */
 }
 
 .card-header {
-    background-color: #f8f9fa; /* Light gray background for card headers */
+    background-color: #f8f9fa; /* Light gray background for card headers */ 
     font-weight: bold;
 }
 
-/* Date/time picker styling */
+/* Date/time picker styling */ 
 .flatpickr-calendar {
     background-color: #fff;
     border: 1px solid #ced4da;
@@ -36,35 +44,36 @@
     border-color: #0d6efd;
 }
 
-/* Add Item and Add Media buttons */
+/* Add Item and Add Media buttons 
 #add-item,
 #add-media {
-    background-color: #6c757d; /* Gray background */
+    background-color: #6c757d; /* Gray background 
     border-color: #6c757d;
 }
 
 #add-item:hover,
 #add-media:hover {
-    background-color: #5a6268; /* Darker gray on hover */
+    background-color: #5a6268; /* Darker gray on hover 
     border-color: #5a6268;
 }
 
-/* Remove buttons */
+/* Remove buttons 
 .remove-item,
 .remove-media {
-    background-color: #dc3545; /* Red background */
+    background-color: #dc3545; /* Red background 
     border-color: #dc3545;
     color: #fff;
-    /* Remove padding and set a fixed width/height */
+    /* Remove padding and set a fixed width/height 
     padding: 0;
     width: 28px;
     height: 28px;
     text-align: center;
-    line-height: 28px; /* Vertically center the X */
+    line-height: 28px; /* Vertically center the X 
 }
 
 .remove-item:hover,
 .remove-media:hover {
-    background-color: #c82333; /* Darker red on hover */
+    background-color: #c82333; /* Darker red on hover 
     border-color: #c82333;
 }
+*/
